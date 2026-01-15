@@ -167,15 +167,19 @@ def add(url):
 
 @cli.command(name="config")
 def show_config():
-    """Show shortie configuration"""
-    click.echo("shortie Configuration:")
-    click.echo(f"  Port: {config.port}")
-    click.echo(f"  Host: localhost")
-    click.echo(f"  Data Directory: {DATA_DIR}")
-    click.echo(f"  Database: {DB_PATH}")
-    click.echo(f"  Config File: {CONFIG_PATH}")
-    click.echo(f"  Log File: {LOG_FILE}")
-    click.echo(f"  Lock File: {LOCK_FILE}")
+    """Show shortie configuration in a cute table"""
+    config_data = [
+        ("Port", str(config.port)),
+        ("Host", "localhost"),
+        ("Data Directory", str(DATA_DIR)),
+        ("Database", str(DB_PATH)),
+        ("Config File", str(CONFIG_PATH)),
+        ("Log File", str(LOG_FILE)),
+        ("Lock File", str(LOCK_FILE)),
+    ]
+
+    click.echo("\n")
+    click.echo(tabulate(config_data, tablefmt="rounded_grid"))
 
 
 @cli.command()
@@ -218,7 +222,7 @@ def list():
         table_data.append((code, short_url, display_url, created))
 
     headers = ["Code", "Short URL", "Original URL", "Created At"]
-    output = tabulate(table_data, headers=headers, tablefmt="fancy_grid")
+    output = tabulate(table_data, headers=headers, tablefmt="rounded_grid")
     click.echo(output)
 
 
