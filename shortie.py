@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import platform
 import secrets
@@ -13,6 +14,34 @@ import pyperclip
 from flask import Flask, abort, redirect, request
 from tabulate import tabulate
 from waitress import serve as run
+
+
+class Config:
+    def __init__(self, config_path: Path, default_port):
+        self.config_path = config_path
+        self.default_port = default_port
+        self._port = None  # Lazy-loaded
+
+    @property
+    def port(self):
+        if self._port is None:
+            self._port = self._load()
+        return self._port
+
+    def _load(self):
+        if self.config_path.exists():
+            try:
+                with open(self.config_path) as f:
+                    return json.load(f).get("port", self.default_port)
+            except (json.JSONDecodeError, KeyError):
+                pass
+        return self.default_port
+
+    def save(self, port):
+        """Save new port and update cache"""
+        with open(self.config_path, "w") as f:
+            json.dump({"port": port}, f)
+        self._port = port  # Update cache
 
 
 # Determine OS-specific data directory
@@ -30,13 +59,17 @@ def get_data_dir():
 # Paths
 DATA_DIR = get_data_dir()
 DATA_DIR.mkdir(parents=True, exist_ok=True)  # Create if missing
-
 DB_PATH = DATA_DIR / "shortie.db"
 LOCK_FILE = Path(tempfile.gettempdir()) / "shortie.lock"
 LOG_FILE = Path(tempfile.gettempdir()) / "shortie.log"
-PORT = 9876
+
+# Config
+CONFIG_PATH = DATA_DIR / "config.json"
+DEFAULT_PORT = 9876
+config = Config(CONFIG_PATH, DEFAULT_PORT)
 
 
+# --- Helper Functions ---
 def generate_code(length=5):
     return secrets.token_urlsafe(length)[:length]
 
@@ -123,7 +156,7 @@ def add(url):
         conn.execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
         conn.commit()
         conn.close()
-        short_url = f"http://localhost:{PORT}/{code}"
+        short_url = f"http://localhost:{config.port}/{code}"
         pyperclip.copy(short_url)
         click.echo(f"Copied to clipboard: {short_url}")
     except sqlite3.IntegrityError:
@@ -144,7 +177,7 @@ def delete(code):
     conn.commit()
     conn.close()
     if deleted:
-        click.echo(f"Deleted: http://localhost:{PORT}/{code}")
+        click.echo(f"Deleted: http://localhost:{config.port}/{code}")
     else:
         click.echo(f"Code '{code}' not found!")
 
@@ -166,7 +199,7 @@ def list():
     # Prepare data
     table_data = []
     for code, url, created in rows:
-        short_url = f"http://localhost:{PORT}/{code}"
+        short_url = f"http://localhost:{config.port}/{code}"
         # Truncate long URLs for readability
         display_url = (url[:40] + "...") if len(url) > 40 else url
         table_data.append((code, short_url, display_url, created))
@@ -177,24 +210,27 @@ def list():
 
 
 @cli.command()
-@click.option("--port", default=PORT, help="Port to run shortie on")
+@click.option("--port", default=DEFAULT_PORT, help="Port to run shortie on")
 def serve(port):
+    config.save(port)
     """Start the local redirect server"""
-    click.echo(f"Running shortie server on `http://localhost:{port}`")
-    run(app=app, host="localhost", port=port)
+    click.echo(f"Running shortie server on `http://localhost:{config.port}`")
+    run(app=app, host="localhost", port=config.port)
 
 
 @cli.command()
-@click.option("--port", default=PORT, help="Port to run shortie on")
+@click.option("--port", default=DEFAULT_PORT, help="Port to run shortie on")
 def start(port):
     """Start shortie server in the background"""
+    config.save(port)
+
     if os.path.exists(LOCK_FILE):
         with open(LOCK_FILE) as f:
             pid = int(f.read().strip())
         try:
             os.kill(pid, 0)  # Check if process exists
             click.echo(f"Server already running (PID: {pid})")
-            click.echo(f"Host: 'localhost'| Port: {PORT})")
+            click.echo(f"Host: 'localhost'| Port: {config.port})")
 
             return
         except OSError:
@@ -214,7 +250,7 @@ def start(port):
         f.write(str(proc.pid))
 
     click.echo(f"Started server (PID: {proc.pid}) | Logs: {log_file}")
-    click.echo(f"Host: 'localhost'| Port: {PORT}")
+    click.echo(f"Host: 'localhost'| Port: {config.port}")
 
 
 @cli.command()
@@ -255,7 +291,7 @@ def status():
                 uptime_str = "Invalid lock file"
                 LOCK_FILE.unlink()
         click.echo(f"Server: {uptime_str} (PID: {pid})")
-        click.echo(f"Host: 'localhost'| Port: {PORT}")
+        click.echo(f"Host: 'localhost'| Port: {config.port}")
     else:
         click.echo("Server: Stopped")
 
