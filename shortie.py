@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+import os
 import secrets
 import sqlite3
+import subprocess
 
 import click
 import pyperclip
@@ -9,6 +11,7 @@ from flask import Flask, abort, redirect, request
 from tabulate import tabulate
 from waitress import serve as run
 
+LOCK_FILE = "/tmp/shortie.lock"
 DB_PATH = "shortie.db"
 PORT = 9876
 
@@ -109,6 +112,23 @@ def add(url):
 
 
 @cli.command()
+@click.argument("code")
+def delete(code):
+    """Delete a short URL by code"""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM urls WHERE code = ?", (code,))
+    deleted = cur.rowcount
+    conn.commit()
+    conn.close()
+    if deleted:
+        click.echo(f"Deleted: http://localhost:{PORT}/{code}")
+    else:
+        click.echo(f"Code '{code}' not found!")
+
+
+@cli.command()
 def list():
     """List all shortened URLs"""
     init_db()
@@ -141,6 +161,95 @@ def serve(port):
     """Start the local redirect server"""
     click.echo(f"Running shortie server on `http://localhost:{port}`")
     run(app=app, host="localhost", port=port)
+
+
+@cli.command()
+@click.option("--port", default=PORT, help="Port to run shortie on")
+def start(port):
+    """Start shortie server in the background"""
+    if os.path.exists(LOCK_FILE):
+        with open(LOCK_FILE) as f:
+            pid = int(f.read().strip())
+        try:
+            os.kill(pid, 0)  # Check if process exists
+            click.echo(f"Server already running (PID: {pid})")
+            return
+        except OSError:
+            # Stale lock file
+            os.remove(LOCK_FILE)
+
+    # Start in background
+    log_file = "/tmp/shortie.log"
+    proc = subprocess.Popen(
+        ["python3", __file__, "serve", "--port", str(port)],
+        stdout=open(log_file, "w"),
+        stderr=subprocess.STDOUT,
+        start_new_session=True,  # Detach from terminal
+    )
+
+    with open(LOCK_FILE, "w") as f:
+        f.write(str(proc.pid))
+
+    click.echo(f"Started server (PID: {proc.pid}) | Logs: {log_file}")
+
+
+@cli.command()
+def stop():
+    """Stop the background server"""
+    if not os.path.exists(LOCK_FILE):
+        click.echo("No background server running")
+        return
+
+    with open(LOCK_FILE) as f:
+        pid = int(f.read().strip())
+
+    try:
+        os.kill(pid, 15)  # SIGTERM
+        os.remove(LOCK_FILE)
+        click.echo(f"Stopped server (PID: {pid})")
+    except ProcessLookupError:
+        click.echo("Server not found. Cleaning up lock file.")
+        os.remove(LOCK_FILE)
+
+
+@cli.command()
+def status():
+    """Show server status and stats"""
+    # Check server status
+    if os.path.exists(LOCK_FILE):
+        with open(LOCK_FILE) as f:
+            try:
+                pid = int(f.read().strip())
+                # Verify process exists
+                os.kill(pid, 0)
+                # Get uptime from /proc (Linux-only!)
+                try:
+                    with open(f"/proc/{pid}/stat") as stat_file:
+                        stats = stat_file.read().split()
+                        start_time_ticks = int(stats[21])  # Clock ticks since boot
+                    with open("/proc/uptime") as uptime_file:
+                        uptime_seconds = float(uptime_file.read().split()[0])
+                    clock_ticks_per_sec = os.sysconf(os.sysconf_names["SC_CLK_TCK"])
+                    process_start_seconds = start_time_ticks / clock_ticks_per_sec
+                    uptime = uptime_seconds - process_start_seconds
+                    hours, remainder = divmod(uptime, 3600)
+                    minutes, seconds = divmod(remainder, 60)
+                    uptime_str = f"{int(hours)}h {int(minutes)}m {int(seconds)}s"
+                except (FileNotFoundError, ValueError, OSError):
+                    uptime_str = "Unknown"
+                click.echo(f"Server: Running (PID: {pid}, Uptime: {uptime_str})")
+            except (ProcessLookupError, ValueError):
+                click.echo("Server: Stopped (stale lock file)")
+                os.remove(LOCK_FILE)
+    else:
+        click.echo("Server: Stopped")
+
+    # Show DB stats
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()[0]
+    conn.close()
+    click.echo(f"Total URLs: {count}")
 
 
 if __name__ == "__main__":
