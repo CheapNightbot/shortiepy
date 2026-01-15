@@ -11,7 +11,6 @@ from pathlib import Path
 
 import click
 import pyperclip
-from colorama import Fore
 from colorama import init as colorama_init
 from flask import Flask, abort, redirect, request
 from tabulate import tabulate
@@ -27,7 +26,7 @@ def cute_echo(text, fg="bright_magenta"):
 
 
 def success(text):
-    return click.style(f"✨ {text}", fg="bright_green")
+    return click.style(f"🌸 {text}", fg="bright_magenta")
 
 
 def error(text):
@@ -35,7 +34,7 @@ def error(text):
 
 
 def info(text):
-    return click.style(f"🌸 {text}", fg="bright_cyan")
+    return click.style(f"ℹ️  {text}", fg="bright_blue")
 
 
 def warn(text):
