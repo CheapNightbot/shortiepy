@@ -74,19 +74,19 @@ def get_data_dir():
     home = Path.home()
     system = platform.system()
     if system == "Windows":
-        return home / "AppData" / "Roaming" / "shortie"
+        return home / "AppData" / "Roaming" / "shortiepy"
     elif system == "Darwin":  # macOS
-        return home / "Library" / "Application Support" / "shortie"
+        return home / "Library" / "Application Support" / "shortiepy"
     else:  # Linux and others
-        return home / ".local" / "share" / "shortie"
+        return home / ".local" / "share" / "shortiepy"
 
 
 # Paths
 DATA_DIR = get_data_dir()
 DATA_DIR.mkdir(parents=True, exist_ok=True)  # Create if missing
-DB_PATH = DATA_DIR / "shortie.db"
-LOCK_FILE = Path(tempfile.gettempdir()) / "shortie.lock"
-LOG_FILE = Path(tempfile.gettempdir()) / "shortie.log"
+DB_PATH = DATA_DIR / "shortiepy.db"
+LOCK_FILE = Path(tempfile.gettempdir()) / "shortiepy.lock"
+LOG_FILE = Path(tempfile.gettempdir()) / "shortiepy.log"
 
 # Config
 CONFIG_PATH = DATA_DIR / "config.json"
@@ -125,7 +125,7 @@ def index():
     count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()
     conn.close()
     return {
-        "shortie": "your local URL shortner ( ˶˘ ³˘)♡",
+        "shortiepy": "your local URL shortner ( ˶˘ ³˘)♡",
         "total_urls": count[0],
     }
 
@@ -165,7 +165,7 @@ def create_short_url():
 # --- CLI Commands ---
 @click.group()
 def cli():
-    """shortie: your local URL shortner ( ˶˘ ³˘)♡"""
+    """shortiepy: your local URL shortner ( ˶˘ ³˘)♡"""
     pass
 
 
@@ -218,7 +218,7 @@ def list():
     conn.close()
 
     if not rows:
-        cute_echo(warn("(;´༎ຶД༎ຶ`) No links yet! Add one with `shortie add <URL>`"))
+        cute_echo(warn("(;´༎ຶД༎ຶ`) No links yet! Add one with `shortiepy add <URL>`"))
         return
 
     # Prepare data
@@ -231,23 +231,23 @@ def list():
 
     headers = ["Code", "Short URL", "Original URL", "Created At"]
     output = tabulate(table_data, headers=headers, tablefmt="rounded_grid")
-    cute_echo(info("Your shortie links:"))
+    cute_echo(info("Your shortiepy links:"))
     click.echo(output)
 
 
 @cli.command(name="serve")
-@click.option("--port", default=DEFAULT_PORT, help="Port to run shortie on")
+@click.option("--port", default=DEFAULT_PORT, help="Port to run shortiepy on")
 def run(port):
     """Start the local redirect server"""
     config.save(port)
-    cute_echo(info(f"Running shortie server on http://localhost:{config.port}"))
+    cute_echo(info(f"Running shortiepy server on http://localhost:{config.port}"))
     cute_echo(warn("Press CTRL + C to stop the server. (๑•̀ㅂ•́)و✧"))
     serve(app=app, host="localhost", port=config.port)
 
 
 @cli.command(name="config")
 def show_config():
-    """Show shortie configurations"""
+    """Show shortiepy configurations"""
     config_data = [
         ("Port", str(config.port)),
         ("Host", "localhost"),
@@ -262,9 +262,9 @@ def show_config():
 
 
 @cli.command()
-@click.option("--port", default=DEFAULT_PORT, help="Port to run shortie on")
+@click.option("--port", default=DEFAULT_PORT, help="Port to run shortiepy on")
 def start(port):
-    """Start shortie server in the background"""
+    """Start shortiepy server in the background"""
     config.save(port)
 
     if LOCK_FILE.exists():
