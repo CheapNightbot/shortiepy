@@ -13,7 +13,7 @@ import click
 import pyperclip
 from flask import Flask, abort, redirect, request
 from tabulate import tabulate
-from waitress import serve as run
+from waitress import serve
 
 
 class Config:
@@ -165,8 +165,8 @@ def add(url):
         return add(url)  # retry
 
 
-@cli.command()
-def config():
+@cli.command(name="config")
+def show_config():
     """Show shortie configuration"""
     click.echo("shortie Configuration:")
     click.echo(f"  Port: {config.port}")
@@ -222,15 +222,15 @@ def list():
     click.echo(output)
 
 
-@cli.command()
+@cli.command(name="serve")
 @click.option("--port", default=DEFAULT_PORT, help="Port to run shortie on")
-def serve(port):
+def run(port):
     """Start the local redirect server"""
     config.save(port)
     """Start the local redirect server"""
     click.echo(f"Running shortie server on `http://localhost:{config.port}`")
     click.echo("Press CTRL + C to stop the server.")
-    run(app=app, host="localhost", port=config.port)
+    serve(app=app, host="localhost", port=config.port)
 
 
 @cli.command()
