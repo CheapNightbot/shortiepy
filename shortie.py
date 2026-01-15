@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+__version__ = "0.1.0"
+
 import json
 import os
 import platform
@@ -164,6 +166,7 @@ def create_short_url():
 
 # --- CLI Commands ---
 @click.group()
+@click.version_option(version=__version__, prog_name="shortiepy")
 def cli():
     """shortiepy: your local URL shortner ( ˶˘ ³˘)♡"""
     pass
