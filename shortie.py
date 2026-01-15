@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
 import os
+import platform
 import secrets
 import sqlite3
 import subprocess
+import tempfile
+from pathlib import Path
 
 import click
 import pyperclip
@@ -11,8 +14,26 @@ from flask import Flask, abort, redirect, request
 from tabulate import tabulate
 from waitress import serve as run
 
-LOCK_FILE = "/tmp/shortie.lock"
-DB_PATH = "shortie.db"
+
+# Determine OS-specific data directory
+def get_data_dir():
+    home = Path.home()
+    system = platform.system()
+    if system == "Windows":
+        return home / "AppData" / "Roaming" / "shortie"
+    elif system == "Darwin":  # macOS
+        return home / "Library" / "Application Support" / "shortie"
+    else:  # Linux and others
+        return home / ".local" / "share" / "shortie"
+
+
+# Paths
+DATA_DIR = get_data_dir()
+DATA_DIR.mkdir(parents=True, exist_ok=True)  # Create if missing
+
+DB_PATH = DATA_DIR / "shortie.db"
+LOCK_FILE = Path(tempfile.gettempdir()) / "shortie.lock"
+LOG_FILE = Path(tempfile.gettempdir()) / "shortie.log"
 PORT = 9876
 
 
@@ -148,9 +169,9 @@ def list():
         short_url = f"http://localhost:{PORT}/{code}"
         # Truncate long URLs for readability
         display_url = (url[:40] + "...") if len(url) > 40 else url
-        table_data.append((short_url, display_url, created))
+        table_data.append((code, short_url, display_url, created))
 
-    headers = ["Short URL", "Original URL", "Created At"]
+    headers = ["Code", "Short URL", "Original URL", "Created At"]
     output = tabulate(table_data, headers=headers, tablefmt="fancy_grid")
     click.echo(output)
 
@@ -179,7 +200,7 @@ def start(port):
             os.remove(LOCK_FILE)
 
     # Start in background
-    log_file = "/tmp/shortie.log"
+    log_file = LOG_FILE
     proc = subprocess.Popen(
         ["python3", __file__, "serve", "--port", str(port)],
         stdout=open(log_file, "w"),
@@ -216,31 +237,21 @@ def stop():
 def status():
     """Show server status and stats"""
     # Check server status
-    if os.path.exists(LOCK_FILE):
+    if LOCK_FILE.exists():
         with open(LOCK_FILE) as f:
             try:
                 pid = int(f.read().strip())
                 # Verify process exists
-                os.kill(pid, 0)
-                # Get uptime from /proc (Linux-only!)
                 try:
-                    with open(f"/proc/{pid}/stat") as stat_file:
-                        stats = stat_file.read().split()
-                        start_time_ticks = int(stats[21])  # Clock ticks since boot
-                    with open("/proc/uptime") as uptime_file:
-                        uptime_seconds = float(uptime_file.read().split()[0])
-                    clock_ticks_per_sec = os.sysconf(os.sysconf_names["SC_CLK_TCK"])
-                    process_start_seconds = start_time_ticks / clock_ticks_per_sec
-                    uptime = uptime_seconds - process_start_seconds
-                    hours, remainder = divmod(uptime, 3600)
-                    minutes, seconds = divmod(remainder, 60)
-                    uptime_str = f"{int(hours)}h {int(minutes)}m {int(seconds)}s"
-                except (FileNotFoundError, ValueError, OSError):
-                    uptime_str = "Unknown"
-                click.echo(f"Server: Running (PID: {pid}, Uptime: {uptime_str})")
-            except (ProcessLookupError, ValueError):
-                click.echo("Server: Stopped (stale lock file)")
-                os.remove(LOCK_FILE)
+                    os.kill(pid, 0)
+                    uptime_str = "Running"
+                except OSError:
+                    uptime_str = "Stopped (stale lock)"
+                    LOCK_FILE.unlink()
+            except ValueError:
+                uptime_str = "Invalid lock file"
+                LOCK_FILE.unlink()
+        click.echo(f"Server: {uptime_str} (PID: {pid})")
     else:
         click.echo("Server: Stopped")
 
