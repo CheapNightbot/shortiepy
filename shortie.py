@@ -35,7 +35,14 @@ app = Flask(__name__)
 # placeholder for now so that we don't get 404 meow ~
 @app.route("/")
 def index():
-    return "shortie: your local URL shortner ( ˶˘ ³˘)♡"
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()
+    conn.close()
+    return {
+        "shortie": "your local URL shortner ( ˶˘ ³˘)♡",
+        "total_urls": count[0],
+    }
 
 
 @app.route("/<code>")
@@ -97,7 +104,7 @@ def list():
         short_url = f"http://localhost:{PORT}/{code}"
         # Truncate long URLs for readability
         display_url = (url[:40] + "...") if len(url) > 40 else url
-        table_data.append([short_url, display_url, created])
+        table_data.append((short_url, display_url, created))
 
     headers = ["Short URL", "Original URL", "Created At"]
     output = tabulate(table_data, headers=headers, tablefmt="fancy_grid")
