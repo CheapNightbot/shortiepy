@@ -11,9 +11,35 @@ from pathlib import Path
 
 import click
 import pyperclip
+from colorama import Fore
+from colorama import init as colorama_init
 from flask import Flask, abort, redirect, request
 from tabulate import tabulate
 from waitress import serve
+
+# --- Kaomoji & Color Helpers ---
+colorama_init()  # Required for Windows
+
+
+def cute_echo(text, fg="bright_magenta"):
+    """Echo with pastel colors and sparkles"""
+    click.echo(click.style(text, fg=fg))
+
+
+def success(text):
+    return click.style(f"✨ {text}", fg="bright_green")
+
+
+def error(text):
+    return click.style(f"❌ {text}", fg="bright_red")
+
+
+def info(text):
+    return click.style(f"🌸 {text}", fg="bright_cyan")
+
+
+def warn(text):
+    return click.style(f"⚠️  {text}", fg="bright_yellow")
 
 
 class Config:
@@ -158,28 +184,11 @@ def add(url):
         conn.close()
         short_url = f"http://localhost:{config.port}/{code}"
         pyperclip.copy(short_url)
-        click.echo(f"Copied to clipboard: {short_url}")
+        cute_echo(success(f"Copied to clipboard: {short_url}"))
     except sqlite3.IntegrityError:
         # Very rare, but handle duplicate codes
-        click.echo("Oops! Try again - code collision (unlikely!) ~ (ᵕ—ᴗ—)")
+        cute_echo(warn("Oops! Code collision (unlikely!) ~ (ᵕ—ᴗ—)"))
         return add(url)  # retry
-
-
-@cli.command(name="config")
-def show_config():
-    """Show shortie configuration in a cute table"""
-    config_data = [
-        ("Port", str(config.port)),
-        ("Host", "localhost"),
-        ("Data Directory", str(DATA_DIR)),
-        ("Database", str(DB_PATH)),
-        ("Config File", str(CONFIG_PATH)),
-        ("Log File", str(LOG_FILE)),
-        ("Lock File", str(LOCK_FILE)),
-    ]
-
-    click.echo("\n")
-    click.echo(tabulate(config_data, tablefmt="rounded_grid"))
 
 
 @cli.command()
@@ -194,9 +203,9 @@ def delete(code):
     conn.commit()
     conn.close()
     if deleted:
-        click.echo(f"Deleted: http://localhost:{config.port}/{code}")
+        cute_echo(success(f"Deleted: http://localhost:{config.port}/{code}"))
     else:
-        click.echo(f"Code '{code}' not found!")
+        cute_echo(error(f"Code '{code}' not found! (；′⌒`)"))
 
 
 @cli.command()
@@ -210,7 +219,7 @@ def list():
     conn.close()
 
     if not rows:
-        click.echo("(;´༎ຶД༎ຶ`) No links yet! Add one with `shortie add <URL>`")
+        cute_echo(warn("(;´༎ຶД༎ຶ`) No links yet! Add one with `shortie add <URL>`"))
         return
 
     # Prepare data
@@ -223,6 +232,7 @@ def list():
 
     headers = ["Code", "Short URL", "Original URL", "Created At"]
     output = tabulate(table_data, headers=headers, tablefmt="rounded_grid")
+    cute_echo(info("Your shortie links:"))
     click.echo(output)
 
 
@@ -231,9 +241,25 @@ def list():
 def run(port):
     """Start the local redirect server"""
     config.save(port)
-    click.echo(f"Running shortie server on `http://localhost:{config.port}`")
-    click.echo("Press CTRL + C to stop the server.")
+    cute_echo(info(f"Running shortie server on http://localhost:{config.port}"))
+    cute_echo(warn("Press CTRL + C to stop the server. (๑•̀ㅂ•́)و✧"))
     serve(app=app, host="localhost", port=config.port)
+
+
+@cli.command(name="config")
+def show_config():
+    """Show shortie configurations"""
+    config_data = [
+        ("Port", str(config.port)),
+        ("Host", "localhost"),
+        ("Data Directory", str(DATA_DIR)),
+        ("Database", str(DB_PATH)),
+        ("Config File", str(CONFIG_PATH)),
+        ("Log File", str(LOG_FILE)),
+        ("Lock File", str(LOCK_FILE)),
+    ]
+
+    click.echo(tabulate(config_data, tablefmt="rounded_grid"))
 
 
 @cli.command()
@@ -247,7 +273,7 @@ def start(port):
             pid = int(f.read().strip())
         try:
             os.kill(pid, 0)
-            click.echo(f"Server already running (PID: {pid})")
+            cute_echo(info(f"Server already running (PID: {pid})"))
             return
         except OSError:
             LOCK_FILE.unlink()
@@ -263,14 +289,15 @@ def start(port):
     with open(LOCK_FILE, "w") as f:
         f.write(str(proc.pid))
 
-    click.echo(f"Started server (PID: {proc.pid}) | Logs: {LOG_FILE}")
+    cute_echo(success(f"Started server (PID: {proc.pid})"))
+    cute_echo(info(f"Logs: {LOG_FILE}"))
 
 
 @cli.command()
 def stop():
     """Stop the background server"""
     if not os.path.exists(LOCK_FILE):
-        click.echo("No background server running")
+        cute_echo(warn("No background server running („• ֊ •„)"))
         return
 
     with open(LOCK_FILE) as f:
@@ -279,9 +306,9 @@ def stop():
     try:
         os.kill(pid, 15)  # SIGTERM
         os.remove(LOCK_FILE)
-        click.echo(f"Stopped server (PID: {pid})")
+        cute_echo(success(f"Stopped server (PID: {pid}) ദ്ദി◝ ⩊ ◜.ᐟ"))
     except ProcessLookupError:
-        click.echo("Server not found. Cleaning up lock file.")
+        cute_echo(error("Server not found. Cleaning up lock file."))
         os.remove(LOCK_FILE)
 
 
@@ -293,19 +320,19 @@ def status():
             try:
                 pid = int(f.read().strip())
                 os.kill(pid, 0)  # Check if running
-                click.echo(f"Server: Running (PID: {pid})")
+                cute_echo(success(f"Server: Running (PID: {pid}) (˶˃ ᵕ ˂˶) .ᐟ.ᐟ"))
             except (OSError, ValueError):
-                click.echo("Server: Stopped (stale lock)")
+                cute_echo(warn("Server: Stopped (stale lock)"))
                 LOCK_FILE.unlink()
     else:
-        click.echo("Server: Stopped")
+        cute_echo(warn("Server: Stopped (•˕ •マ.ᐟ"))
 
     # Show DB stats
     init_db()
     conn = sqlite3.connect(DB_PATH)
     count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()[0]
     conn.close()
-    click.echo(f"Total URLs: {count}")
+    cute_echo(info(f"Total URLs: {count}"))
 
 
 if __name__ == "__main__":
