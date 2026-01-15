@@ -231,7 +231,6 @@ def list():
 def run(port):
     """Start the local redirect server"""
     config.save(port)
-    """Start the local redirect server"""
     click.echo(f"Running shortie server on `http://localhost:{config.port}`")
     click.echo("Press CTRL + C to stop the server.")
     serve(app=app, host="localhost", port=config.port)
