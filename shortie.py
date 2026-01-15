@@ -225,7 +225,7 @@ def list():
 @cli.command()
 @click.option("--port", default=DEFAULT_PORT, help="Port to run shortie on")
 def serve(port):
-    """Start the local redirect server (in foregournd)"""
+    """Start the local redirect server"""
     config.save(port)
     """Start the local redirect server"""
     click.echo(f"Running shortie server on `http://localhost:{config.port}`")
