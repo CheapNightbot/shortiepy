@@ -194,6 +194,8 @@ def start(port):
         try:
             os.kill(pid, 0)  # Check if process exists
             click.echo(f"Server already running (PID: {pid})")
+            click.echo(f"Host: 'localhost'| Port: {PORT})")
+
             return
         except OSError:
             # Stale lock file
@@ -212,6 +214,7 @@ def start(port):
         f.write(str(proc.pid))
 
     click.echo(f"Started server (PID: {proc.pid}) | Logs: {log_file}")
+    click.echo(f"Host: 'localhost'| Port: {PORT}")
 
 
 @cli.command()
@@ -252,6 +255,7 @@ def status():
                 uptime_str = "Invalid lock file"
                 LOCK_FILE.unlink()
         click.echo(f"Server: {uptime_str} (PID: {pid})")
+        click.echo(f"Host: 'localhost'| Port: {PORT}")
     else:
         click.echo("Server: Stopped")
 
@@ -261,6 +265,9 @@ def status():
     count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()[0]
     conn.close()
     click.echo(f"Total URLs: {count}")
+
+    # Show configs
+    click.echo(f"Data Directory: {DATA_DIR}")
 
 
 if __name__ == "__main__":
