@@ -166,6 +166,19 @@ def add(url):
 
 
 @cli.command()
+def config():
+    """Show shortie configuration"""
+    click.echo("shortie Configuration:")
+    click.echo(f"  Port: {config.port}")
+    click.echo(f"  Host: localhost")
+    click.echo(f"  Data Directory: {DATA_DIR}")
+    click.echo(f"  Database: {DB_PATH}")
+    click.echo(f"  Config File: {CONFIG_PATH}")
+    click.echo(f"  Log File: {LOG_FILE}")
+    click.echo(f"  Lock File: {LOCK_FILE}")
+
+
+@cli.command()
 @click.argument("code")
 def delete(code):
     """Delete a short URL by code"""
@@ -224,33 +237,28 @@ def start(port):
     """Start shortie server in the background"""
     config.save(port)
 
-    if os.path.exists(LOCK_FILE):
+    if LOCK_FILE.exists():
         with open(LOCK_FILE) as f:
             pid = int(f.read().strip())
         try:
-            os.kill(pid, 0)  # Check if process exists
+            os.kill(pid, 0)
             click.echo(f"Server already running (PID: {pid})")
-            click.echo(f"Host: 'localhost'| Port: {config.port})")
-
             return
         except OSError:
-            # Stale lock file
-            os.remove(LOCK_FILE)
+            LOCK_FILE.unlink()
 
     # Start in background
-    log_file = LOG_FILE
     proc = subprocess.Popen(
         ["python3", __file__, "serve", "--port", str(port)],
-        stdout=open(log_file, "w"),
+        stdout=open(LOG_FILE, "w"),
         stderr=subprocess.STDOUT,
-        start_new_session=True,  # Detach from terminal
+        start_new_session=True,
     )
 
     with open(LOCK_FILE, "w") as f:
         f.write(str(proc.pid))
 
-    click.echo(f"Started server (PID: {proc.pid}) | Logs: {log_file}")
-    click.echo(f"Host: 'localhost'| Port: {config.port}")
+    click.echo(f"Started server (PID: {proc.pid}) | Logs: {LOG_FILE}")
 
 
 @cli.command()
@@ -275,23 +283,15 @@ def stop():
 @cli.command()
 def status():
     """Show server status and stats"""
-    # Check server status
     if LOCK_FILE.exists():
         with open(LOCK_FILE) as f:
             try:
                 pid = int(f.read().strip())
-                # Verify process exists
-                try:
-                    os.kill(pid, 0)
-                    uptime_str = "Running"
-                except OSError:
-                    uptime_str = "Stopped (stale lock)"
-                    LOCK_FILE.unlink()
-            except ValueError:
-                uptime_str = "Invalid lock file"
+                os.kill(pid, 0)  # Check if running
+                click.echo(f"Server: Running (PID: {pid})")
+            except (OSError, ValueError):
+                click.echo("Server: Stopped (stale lock)")
                 LOCK_FILE.unlink()
-        click.echo(f"Server: {uptime_str} (PID: {pid})")
-        click.echo(f"Host: 'localhost'| Port: {config.port}")
     else:
         click.echo("Server: Stopped")
 
@@ -301,9 +301,6 @@ def status():
     count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()[0]
     conn.close()
     click.echo(f"Total URLs: {count}")
-
-    # Show configs
-    click.echo(f"Data Directory: {DATA_DIR}")
 
 
 if __name__ == "__main__":
