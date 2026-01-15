@@ -4,7 +4,8 @@ import secrets
 import sqlite3
 
 import click
-from flask import Flask, abort, redirect
+import pyperclip
+from flask import Flask, abort, redirect, request
 from tabulate import tabulate
 from waitress import serve as run
 
@@ -60,6 +61,25 @@ def redirect_url(code):
     return redirect(row[0])
 
 
+@app.route("/new")
+def create_short_url():
+    code = request.args.get("code")
+    url = request.args.get("url")
+
+    if not code or not url:
+        return "Error: Missing 'code' or 'url'", 400
+
+    init_db()
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
+        conn.commit()
+        conn.close()
+        return f"http://localhost:{PORT}/{code}", 200
+    except sqlite3.IntegrityError:
+        return f"Code '{code}' exists", 409
+
+
 # --- CLI Commands ---
 @click.group()
 def cli():
@@ -70,7 +90,7 @@ def cli():
 @cli.command()
 @click.argument("url")
 def add(url):
-    """Add a new URL and get a short code"""
+    """Add a new URL and copy short link to clipboard"""
     init_db()
     code = generate_code()
 
@@ -79,7 +99,9 @@ def add(url):
         conn.execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
         conn.commit()
         conn.close()
-        click.echo(f"Short URL: http://localhost:{PORT}/{code}")
+        short_url = f"http://localhost:{PORT}/{code}"
+        pyperclip.copy(short_url)
+        click.echo(f"Copied to clipboard: {short_url}")
     except sqlite3.IntegrityError:
         # Very rare, but handle duplicate codes
         click.echo("Oops! Try again - code collision (unlikely!) ~ (ᵕ—ᴗ—)")
