@@ -1,3 +1,3 @@
 # shortiepy
 
-A local-only URL shortener [PROTOTYPE]
+A local-only URL shortener
