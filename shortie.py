@@ -132,7 +132,7 @@ def create_short_url():
         conn.execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
         conn.commit()
         conn.close()
-        return f"http://localhost:{PORT}/{code}", 200
+        return f"http://localhost:{config.port}/{code}", 200
     except sqlite3.IntegrityError:
         return f"Code '{code}' exists", 409
 
