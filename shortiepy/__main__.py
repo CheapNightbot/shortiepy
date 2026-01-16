@@ -14,6 +14,7 @@ import secrets
 import shutil
 import sqlite3
 import subprocess
+import sys
 import tempfile
 import webbrowser
 from pathlib import Path
@@ -691,8 +692,9 @@ def start(port):
             LOCK_FILE.unlink()
 
     # Start in background
+    # Using the same Python interpreter and module path
     proc = subprocess.Popen(
-        ["python3", __file__, "serve", "--port", str(port)],
+        [sys.executable, "-m", "shortiepy", "serve", "--port", str(port)],
         stdout=open(LOG_FILE, "w"),
         stderr=subprocess.STDOUT,
         start_new_session=True,
