@@ -155,6 +155,9 @@ def index():
         <meta charset="utf-8">
         <title>shortiepy 🌸</title>
         <style>
+            *::selection {{
+                background: #ffdfef;
+            }}
             body {{
                 font-family: 'Segoe UI', system-ui, sans-serif;
                 max-width: 800px;
@@ -183,6 +186,9 @@ def index():
                 border-radius: 12px;
                 margin: 20px 0;
                 text-align: center;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
             }}
             .card {{
                 background: white;
@@ -214,6 +220,11 @@ def index():
                 padding: 0;
                 font-size: 0.95em;
             }}
+            .link {{
+                color: #ff69b4;
+                text-decoration: none;
+                display: inline-block;
+            }}
         </style>
     </head>
     <body>
@@ -223,7 +234,8 @@ def index():
         </div>
 
         <div class="stats">
-            <strong>Total URLs:</strong> {count}
+            <p><strong>Total URLs:</strong> {count}</p>
+            <a href="/list" class="link">View URLs</a>
         </div>
 
         <div class="card">
@@ -493,6 +505,115 @@ def create_short_url():
         """,
             409,
         )
+
+
+@app.route("/list")
+def list_urls():
+    """Show all URLs in a cute HTML table"""
+    init_db()
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT code, url, created_at FROM urls ORDER BY created_at DESC"
+            )
+            rows = cur.fetchall()
+    except sqlite3.OperationalError:
+        rows = []
+
+    # Generate table rows
+    table_rows = ""
+    for code, url, created in rows:
+        short_url = f"http://localhost:{config.port}/{code}"
+        display_url = (url[:50] + "...") if len(url) > 50 else url
+        table_rows += f"""
+        <tr>
+            <td>{code}</td>
+            <td><a href="{short_url}" style="color: #ff69b4;">{short_url}</a></td>
+            <td>{display_url}</td>
+            <td>{created}</td>
+        </tr>
+        """
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>shortiepy 🌸</title>
+        <style>
+            body {{
+                font-family: 'Segoe UI', system-ui, sans-serif;
+                max-width: 1000px;
+                margin: 40px auto;
+                padding: 20px;
+                background: #fff9fb;
+                color: #5a3a5e;
+                line-height: 1.6rem;
+            }}
+            h1 {{
+                color: #ff69b4;
+                text-align: center;
+                margin-bottom: 30px;
+            }}
+            .header {{
+                text-align: center;
+                margin-bottom: 30px;
+            }}
+            .card {{
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 20px 0;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }}
+            th, td {{
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #f0e6f5;
+            }}
+            th {{
+                background: #f8e9f1;
+                color: #d47ab8;
+                font-weight: 600;
+            }}
+            tr:hover {{
+                background: #fdf6fa;
+            }}
+            a {{
+                color: #ff69b4;
+                text-decoration: none;
+            }}
+            a:hover {{
+                text-decoration: underline;
+            }}
+            .btn {{
+                color: #ff69b4;
+                background: #ffdfef;
+                padding: 0.6rem;
+                border-radius: 0.5rem;
+                text-decoration: none;
+                display: inline-block;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>✨ Your shortiepy Links 🌸</h1>
+            <p><a href="/" class="btn">← Back to homepage</a></p>
+        </div>
+
+        <div class="card">
+            {f'<table><thead><tr><th>Code</th><th>Short URL</th><th>Original URL</th><th>Created At</th></tr></thead><tbody>{table_rows}</tbody></table>' if rows else '<p style="text-align: center; color: #a07cb2;">(;´༎ຶД༎ຶ`) No links yet!</p>'}
+        </div>
+    </body>
+    </html>
+    """
 
 
 # --- CLI Commands ---
