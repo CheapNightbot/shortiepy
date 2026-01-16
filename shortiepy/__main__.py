@@ -356,8 +356,10 @@ def start(port):
     server_script = f"""
 import sys
 sys.path.insert(0, {repr(str(package_dir))})
-from shortiepy.__main__ import app
+from shortiepy.__main__ import create_flask_app, DB_PATH
 from waitress import serve
+
+app = create_flask_app()
 serve(app=app, host="localhost", port={port})
 """
 
