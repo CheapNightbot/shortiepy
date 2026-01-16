@@ -15,6 +15,14 @@ Your local URL shortener (˶˘ ³˘)♡
 pip install shortiepy
 ```
 
+- **Download Standalone Binaries**
+
+Download from [GitHub Releases](https://github.com/CheapNightbot/shortiepy/releases/latest):
+
+- Linux: `shortiepy-linux`
+- macOS: `shortiepy-macos`
+- Windows: `shortiepy-windows.exe`
+
 ## Usage
 
 - **Add a URL**
@@ -45,7 +53,7 @@ Get tab-completion with **one command**:
 shortiepy completion
 ```
 
-> Restart your shell or reload config (`source ~/.bashrc` for bash OR `source ~/.zshrc` for zsh). 
+> Restart your shell or reload config (`source ~/.bashrc` for bash OR `source ~/.zshrc` for zsh).
 > Fish users: no restart needed!
 
 That's it! Works for bash, zsh, and fish.
