@@ -139,6 +139,11 @@ def db_execute(query, params=(), fetch=False):
         raise
 
 
+def start_server(port):
+    """Start the Waitress server"""
+    serve(app=app, host="localhost", port=port)
+
+
 # --- Flask App (for server) ---
 app = Flask(__name__)
 
@@ -691,10 +696,22 @@ def start(port):
         except OSError:
             LOCK_FILE.unlink()
 
+    package_dir = Path(__file__).parent.resolve()
+    if not (package_dir / "__main__.py").exists():
+        raise RuntimeError("Cannot find shortiepy package")
+
+    # Create a minimal script to start the server
+    server_script = f"""
+import sys
+sys.path.insert(0, {repr(str(package_dir))})
+from shortiepy.__main__ import app
+from waitress import serve
+serve(app=app, host="localhost", port={port})
+"""
+
     # Start in background
-    # Using the same Python interpreter and module path
     proc = subprocess.Popen(
-        [sys.executable, "-m", "shortiepy", "serve", "--port", str(port)],
+        [sys.executable, "-c", server_script],
         stdout=open(LOG_FILE, "w"),
         stderr=subprocess.STDOUT,
         start_new_session=True,
