@@ -37,6 +37,19 @@ shortiepy start  # will run in background
 shortiepy docs
 ```
 
+## Shell Completion
+
+Get tab-completion with **one command**:
+
+```bash
+shortiepy completion
+```
+
+> Restart your shell or reload config (source ~/.bashrc / source ~/.zshrc).
+> Fish users: no restart needed!
+
+That's it! Works for bash, zsh, and fish.
+
 ## Why
 
 For some reason, when I’m working on things or trying to learn something new, my browser ends up filled with tons of tabs—which makes my laptop-chan angry ~ ₍^.  ̫.^₎
@@ -75,3 +88,13 @@ pip install -e .
 
 Now you can run `shortiepy` from anywhere in your terminal!
 Made a change? It’ll work immediately—no reinstall needed!
+
+### Updating Shell Completions
+
+If you modify CLI commands or options, regenerate completions:
+
+```bash
+./scripts/generate-completions.sh
+```
+
+> This updates the files in `shortiepy/completions/` directory.
