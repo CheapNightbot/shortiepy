@@ -46,3 +46,24 @@ I don’t want to close them or bookmark them. I tried manually copying URLs int
 I didn’t want to send anything online, and existing self-hosted URL shorteners felt like overkill for such a small need.
 
 So I made this: a minimal, local-only URL shortener. It started as a single script file and isn’t perfect—but it just works! ~ ദ്ദി/ᐠ｡‸｡ᐟ\
+
+
+## For Developers
+
+Want to tinker with `shortiepy` or contribute? Here's how to set it up locally:
+
+```bash
+# Create a virtual environment (keeps things clean!)
+python -m venv .venv
+
+# Activate it
+source .venv/bin/activate  # Linux/macOS
+# OR
+.venv\Scripts\activate     # Windows
+
+# Install in editable mode (changes reflect instantly!)
+pip install -e .
+```
+
+Now you can run `shortiepy` from anywhere in your terminal!
+Made a change? It’ll work immediately—no reinstall needed!
