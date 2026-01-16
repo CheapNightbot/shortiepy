@@ -55,18 +55,13 @@ jobs:
       shell: bash
       run: |
         if [[ "$RUNNER_OS" == "Windows" ]]; then
-          python -m shiv -c shortiepy -o ./shortiepy.exe .
-          asset=shortiepy-windows.exe
-          mv shortiepy.exe $asset
+          python -m shiv -c shortiepy -o shortiepy-windows.exe .
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          python -m shiv -c shortiepy -o shortiepy-macos .
+          chmod +x shortiepy-macos
         else
-          python -m shiv -c shortiepy -o ./shortiepy-bin .
-          chmod +x shortiepy-bin
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            asset=shortiepy-macos
-          else
-            asset=shortiepy-linux
-          fi
-          mv shortiepy-bin $asset
+          python -m shiv -c shortiepy -o shortiepy-linux .
+          chmod +x shortiepy-linux
         fi
     - name: Upload binary
       uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
