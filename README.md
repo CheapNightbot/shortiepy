@@ -45,6 +45,42 @@ shortiepy start  # will run in background
 shortiepy docs
 ```
 
+### Create Links from browser
+
+shortiepy supports creating short URLs from within your browser (without having to use CLI `add` command).
+
+You can visit `/new` route and provide `code` (this will be used to generate short url) and `url` (the URL you want to create short link for) query paramters:
+
+- `http://localhost:9876/new?code=meow&url=https://example.com`
+
+    - It will create short link for `https://example.com` using provided short code: `http://localhost:9876/meow`
+
+    - The `code` parameter is optional and can be omitted.
+
+However, vising that URL and route manully is tedious! But if your browser allows it, like I have [Brave](https://brave.com/) browser, you can add a shortcut for it:
+
+- In your browser go to settings and find "search engines". In Brave, it's `brave://settings/searchEngines` and add the following in "Site search":
+
+  - Name: `shortiepy` (or anything you like)
+  - Shortcut: `:sh` (or anything you like)
+  - URL: `http://localhost:9876/new?url=%s`
+
+<details>
+  <summary>Click to See Screen Recording of above steps!</summary>
+  
+![Add Shortcut in Browser](https://github.com/user-attachments/assets/2f03b437-0452-4f22-9225-e12e10a2b15c)
+
+</details>
+ 
+Now when you wnat to create a short link, just type `:sh` in url bar and press `spacebar`, then you can paste the URL you want to create short link for and press enter!
+
+<details>
+  <summary>Click to See Screen Recording of above steps!</summary>
+
+![Use Shortcut to create short link](https://github.com/user-attachments/assets/bf04838a-09f8-4d30-888c-f6c043328ae4)
+
+</details>
+
 ## Shell Completion
 
 Get tab-completion with **one command**:
