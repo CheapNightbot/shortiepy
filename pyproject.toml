@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shortiepy"
+description = "A local-only URL shortener (˶˘ ³˘)♡"
+keywords = ["cli", "shortie", "shortiepy", "URL shortener"]
+dynamic = ["version"]
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+  {name = "ポテト ^. .^₎ฅ"},
+  {name = "ポテト ^. .^₎ฅ", email = "nya@cheapnightbot.me"},
+]
+requires-python = ">=3.10"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Utilities",
+]
+dependencies = [
+    "click>=8.3.1",
+    "colorama>=0.4.6",
+    "Flask>=3.1.2",
+    "pyperclip>=1.11.0",
+    "tabulate>=0.9.0",
+    "waitress>=3.0.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/CheapNightbot/shortiepy"
+Repository = "https://github.com/CheapNightbot/shortiepy.git"
+Issues = "https://github.com/CheapNightbot/shortiepy/issues"
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+
+[project.scripts]
+shortiepy = "shortiepy.__main__:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["shortiepy*"]

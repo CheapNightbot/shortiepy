@@ -679,7 +679,3 @@ def status():
     count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()[0]
     conn.close()
     cute_echo(info(f"Total URLs: {count}"))
-
-
-if __name__ == "__main__":
-    cli()
