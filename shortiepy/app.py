@@ -62,7 +62,7 @@ def create_app(db_path, config_port):
             return render_template(
                 "message.html",
                 title="✨ Success!",
-                message=f"Created short URL: <a href='{short_url}'>{short_url}</a>",
+                message=f"Created short URL: <a href='{short_url}' target='_blank' rel='nofollow noopener'>{short_url}</a>",
                 link="/",
             )
         except sqlite3.IntegrityError:
