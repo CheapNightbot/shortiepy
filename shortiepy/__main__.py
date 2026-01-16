@@ -687,6 +687,7 @@ def start(port):
         try:
             os.kill(pid, 0)
             cute_echo(info(f"Server already running (PID: {pid})"))
+            cute_echo(info(f"URL: http://localhost:{config.port}"))
             return
         except OSError:
             LOCK_FILE.unlink()
@@ -717,6 +718,7 @@ serve(app=app, host="localhost", port={port})
 
     cute_echo(success(f"Started server (PID: {proc.pid})"))
     cute_echo(info(f"Logs: {LOG_FILE}"))
+    cute_echo(info(f"URL: http://localhost:{config.port}"))
 
 
 @cli.command()
