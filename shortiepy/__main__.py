@@ -139,11 +139,6 @@ def db_execute(query, params=(), fetch=False):
         raise
 
 
-def start_server(port):
-    """Start the Waitress server"""
-    serve(app=app, host="localhost", port=port)
-
-
 # --- Flask App (for server) ---
 app = Flask(__name__)
 
@@ -235,7 +230,11 @@ def index():
             <h2>🌐 Web API</h2>
             <p>Create short URLs directly from your browser:</p>
             <code>/new?code=your_code&url=https://example.com</code>
-            <p>Example: <a href="/new?code=meow&url=https://example.com">/new?code=meow&url=https://example.com</a></p>
+            <p>Example: </p>
+            <ul>
+                <li><a href="/new?code=meow&url=https://example.com">/new?code=meow&url=https://example.com</a></li>
+                <li><a href="/new?url=https://example.org">/new?code=url=https://example.org</a></li>
+            </ul>
         </div>
 
         <div class="card">
@@ -332,12 +331,12 @@ def redirect_url(code):
 
 @app.route("/new")
 def create_short_url():
-    code = request.args.get("code")
+    code = request.args.get("code") or generate_code()
     url = request.args.get("url")
 
     if not code or not url:
         return (
-            """
+            f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -692,6 +691,7 @@ def start(port):
         try:
             os.kill(pid, 0)
             cute_echo(info(f"Server already running (PID: {pid})"))
+            cute_echo(info(f"URL: http://localhost:{config.port}"))
             return
         except OSError:
             LOCK_FILE.unlink()
@@ -722,6 +722,7 @@ serve(app=app, host="localhost", port={port})
 
     cute_echo(success(f"Started server (PID: {proc.pid})"))
     cute_echo(info(f"Logs: {LOG_FILE}"))
+    cute_echo(info(f"URL: http://localhost:{config.port}"))
 
 
 @cli.command()
