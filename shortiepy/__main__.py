@@ -230,7 +230,11 @@ def index():
             <h2>🌐 Web API</h2>
             <p>Create short URLs directly from your browser:</p>
             <code>/new?code=your_code&url=https://example.com</code>
-            <p>Example: <a href="/new?code=meow&url=https://example.com">/new?code=meow&url=https://example.com</a></p>
+            <p>Example: </p>
+            <ul>
+                <li><a href="/new?code=meow&url=https://example.com">/new?code=meow&url=https://example.com</a></li>
+                <li><a href="/new?url=https://example.org">/new?code=url=https://example.org</a></li>
+            </ul>
         </div>
 
         <div class="card">
@@ -327,7 +331,7 @@ def redirect_url(code):
 
 @app.route("/new")
 def create_short_url():
-    code = request.args.get("code")
+    code = request.args.get("code") or generate_code()
     url = request.args.get("url")
 
     if not code or not url:
