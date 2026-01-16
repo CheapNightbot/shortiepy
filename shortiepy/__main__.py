@@ -139,11 +139,6 @@ def db_execute(query, params=(), fetch=False):
         raise
 
 
-def start_server(port):
-    """Start the Waitress server"""
-    serve(app=app, host="localhost", port=port)
-
-
 # --- Flask App (for server) ---
 app = Flask(__name__)
 
