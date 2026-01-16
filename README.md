@@ -72,7 +72,7 @@ However, vising that URL and route manully is tedious! But if your browser allow
 
 </details>
  
-Now when you wnat to create a short link, just type `:sh` in url bar and press `spacebar`, then you can paste the URL you want to create short link for and press enter!
+Now when you want to create a short link, just type `:sh` in url bar and press `spacebar`, then you can paste the URL you want to create short link for and press enter!
 
 <details>
   <summary>Click to See Screen Recording of above steps!</summary>
