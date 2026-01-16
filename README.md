@@ -52,6 +52,14 @@ So I made this: a minimal, local-only URL shortener. It started as a single scri
 
 Want to tinker with `shortiepy` or contribute? Here's how to set it up locally:
 
+- Clone the repository locally and change the directory into it:
+
+```bash
+git clone https://github.com/CheapNightbot/shortiepy.git && cd shortiepy
+```
+
+- Install `shortiepy`:
+
 ```bash
 # Create a virtual environment (keeps things clean!)
 python -m venv .venv
