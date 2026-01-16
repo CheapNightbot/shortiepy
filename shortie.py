@@ -9,6 +9,7 @@ import secrets
 import sqlite3
 import subprocess
 import tempfile
+import webbrowser
 from pathlib import Path
 
 import click
@@ -119,17 +120,176 @@ def init_db():
 app = Flask(__name__)
 
 
-# placeholder for now so that we don't get 404 meow ~
 @app.route("/")
 def index():
     init_db()
     conn = sqlite3.connect(DB_PATH)
-    count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()
+    count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()[0]
     conn.close()
-    return {
-        "shortiepy": "your local URL shortner ( ˶˘ ³˘)♡",
-        "total_urls": count[0],
-    }
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>shortiepy 🌸</title>
+        <style>
+            body {{
+                font-family: 'Segoe UI', system-ui, sans-serif;
+                max-width: 800px;
+                margin: 40px auto;
+                padding: 20px;
+                background: #fff9fb;
+                color: #5a3a5e;
+                line-height: 1.6rem;
+            }}
+            h1 {{
+                color: #ff69b4;
+                text-align: center;
+                margin-bottom: 30px;
+            }}
+            h2, h3 {{
+                color: #d47ab8;
+                margin-top: 24px;
+            }}
+            .header {{
+                text-align: center;
+                margin-bottom: 30px;
+            }}
+            .stats {{
+                background: #f8e9f1;
+                padding: 15px;
+                border-radius: 12px;
+                margin: 20px 0;
+                text-align: center;
+            }}
+            .card {{
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 20px 0;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }}
+            code {{
+                background: #f0e6f5;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-family: monospace;
+            }}
+            .option {{
+                color: #a07cb2;
+                font-style: italic;
+                font-size: 0.9em;
+            }}
+            pre {{
+                background: #f8e9f1;
+                padding: 12px;
+                border-radius: 8px;
+                overflow-x: auto;
+                margin: 12px 0;
+            }}
+            pre code {{
+                background: transparent;
+                padding: 0;
+                font-size: 0.95em;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>✨ shortiepy 🌸</h1>
+            <p>Your local URL shortener ( ˶˘ ³˘)♡</p>
+        </div>
+
+        <div class="stats">
+            <strong>Total URLs:</strong> {count}
+        </div>
+
+        <div class="card">
+            <h2>🌐 Web API</h2>
+            <p>Create short URLs directly from your browser:</p>
+            <code>/new?code=your_code&url=https://example.com</code>
+            <p>Example: <a href="/new?code=meow&url=https://example.com">/new?code=meow&url=https://example.com</a></p>
+        </div>
+
+        <div class="card">
+            <h2>💻 CLI Commands</h2>
+
+            <h3>🔗 URL Management</h3>
+            <ul>
+                <li><code>shortiepy add &lt;URL&gt;</code> → Create short URL</li>
+                <li><code>shortiepy list</code> → Show all links</li>
+                <li><code>shortiepy delete &lt;code&gt;</code> → Remove link</li>
+            </ul>
+
+            <h3>🖥️ Server Control</h3>
+            <ul>
+                <li><code>shortiepy serve</code> → Start server (foreground)
+                    <ul class="option">
+                        <li>Optional: <code>--port PORT</code></li>
+                    </ul>
+                </li>
+                <li><code>shortiepy start</code> → Start server (background)
+                    <ul class="option">
+                        <li>Optional: <code>--port PORT</code></li>
+                    </ul>
+                </li>
+                <li><code>shortiepy stop</code> → Stop background server</li>
+                <li><code>shortiepy status</code> → Check server status</li>
+            </ul>
+
+            <h3>ℹ️ Information</h3>
+            <ul>
+                <li><code>shortiepy config</code> → Show configuration</li>
+                <li><code>shortiepy docs</code> → Open this documentation</li>
+                <li><code>shortiepy --version</code> → Show version</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>📝 Examples</h2>
+
+            <h3>✨ Basic Workflow</h3>
+            <pre><code>&gt;&gt;&gt; shortiepy add https://example.com/very/long/url
+🌸 Copied to clipboard: http://localhost:9876/x9f2k</code></pre>
+
+            <pre><code>&gt;&gt;&gt; shortiepy list
+ℹ️  Your shortiepy links:
+╭────────┬─────────────────────────────┬───────────────────────────────────┬─────────────────────╮
+│ Code   │ Short URL                   │ Original URL                      │ Created At          │
+├────────┼─────────────────────────────┼───────────────────────────────────┼─────────────────────┤
+│ x9f2k  │ http://localhost:9876/x9f2k │ https://example.com/very/long/url │ YYYY-MM-DD hh:mm:ss │
+╰────────┴─────────────────────────────┴───────────────────────────────────┴─────────────────────╯
+</code></pre>
+
+            <pre><code>&gt;&gt;&gt; shortiepy delete x9f2k
+🌸 Deleted: http://localhost:9876/x9f2k</code></pre>
+
+            <h3>⚙️ Custom Port</h3>
+            <pre><code>&gt;&gt;&gt; shortiepy start --port 8080
+🌸 Started server (PID: 12345)
+ℹ️  Logs: /tmp/shortiepy.log</code></pre>
+
+            <pre><code>&gt;&gt;&gt; shortiepy add https://example.com
+🌸 Copied to clipboard: http://localhost:8080/y3k9m</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>🎀 Features</h2>
+            <ul>
+                <li>🔒 100% offline - no data leaves your machine</li>
+                <li>🌸 Cross-platform (Linux/macOS/Windows)</li>
+                <li>📋 Auto-copies short URLs to clipboard</li>
+                <li>🎨 Pastel colors & kaomojis everywhere!</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; color: #a07cb2;">
+            <p>Made with 🩷 by ポテト ^. .^₎ฅ | v{__version__}</p>
+        </div>
+    </body>
+    </html>
+    """
 
 
 @app.route("/<code>")
@@ -151,7 +311,56 @@ def create_short_url():
     url = request.args.get("url")
 
     if not code or not url:
-        return "Error: Missing 'code' or 'url'", 400
+        return (
+            """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>shortiepy 🌸</title>
+            <style>
+                body {{
+                    font-family: 'Segoe UI', system-ui, sans-serif;
+                    max-width: 800px;
+                    margin: 40px auto;
+                    padding: 20px;
+                    background: #fff9fb;
+                    color: #5a3a5e;
+                    line-height: 1.6rem;
+                }}
+                h2, h3 {{
+                    color: #d47ab8;
+                    margin-top: 24px;
+                }}
+                .card {{
+                    background: white;
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin: 20px 0;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    text-align: center;
+                }}
+                .btn {{
+                    color: #ff69b4;
+                    background: #ffdfef;
+                    padding: 0.6rem;
+                    border-radius: 0.5rem;
+                    text-decoration: none;
+                    display: inline-block;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h2>❌ Missing Parameters</h2>
+                <p>Use: <code>/new?code=your_code&url=https://example.com</code></p>
+                <a href="/" class="btn">← Back to homepage</a>
+            </div>
+        </body>
+        </html>
+        """,
+            400,
+        )
 
     init_db()
     try:
@@ -159,9 +368,109 @@ def create_short_url():
         conn.execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
         conn.commit()
         conn.close()
-        return f"http://localhost:{config.port}/{code}", 200
+        short_url = f"http://localhost:{config.port}/{code}"
+        return (
+            f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>shortiepy 🌸</title>
+            <style>
+                body {{
+                    font-family: 'Segoe UI', system-ui, sans-serif;
+                    max-width: 800px;
+                    margin: 40px auto;
+                    padding: 20px;
+                    background: #fff9fb;
+                    color: #5a3a5e;
+                    line-height: 1.6rem;
+                }}
+                h2, h3 {{
+                    color: #d47ab8;
+                    margin-top: 24px;
+                }}
+                .card {{
+                    background: white;
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin: 20px 0;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    text-align: center;
+                }}
+                .btn {{
+                    color: #ff69b4;
+                    background: #ffdfef;
+                    padding: 0.6rem;
+                    border-radius: 0.5rem;
+                    text-decoration: none;
+                    display: inline-block;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h2>✨ Success!</h2>
+                <p>Created short URL:</p>
+                <p><a href="{short_url}" style="color: #ff69b4; font-size: 1.2em;">{short_url}</a></p>
+                <a href="/" class="btn">← Back to homepage</a>
+            </div>
+        </body>
+        </html>
+        """,
+            200,
+        )
     except sqlite3.IntegrityError:
-        return f"Code '{code}' exists", 409
+        return (
+            f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>shortiepy 🌸</title>
+            <style>
+                body {{
+                    font-family: 'Segoe UI', system-ui, sans-serif;
+                    max-width: 800px;
+                    margin: 40px auto;
+                    padding: 20px;
+                    background: #fff9fb;
+                    color: #5a3a5e;
+                    line-height: 1.6rem;
+                }}
+                h2, h3 {{
+                    color: #d47ab8;
+                    margin-top: 24px;
+                }}
+                .card {{
+                    background: white;
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin: 20px 0;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    text-align: center;
+                }}
+                .btn {{
+                    color: #ff69b4;
+                    background: #ffdfef;
+                    padding: 0.6rem;
+                    border-radius: 0.5rem;
+                    text-decoration: none;
+                    display: inline-block;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h2>⚠️ Code Exists</h2>
+                <p>Code '{code}' is already taken!</p>
+                <a href="/" class="btn">← Back to homepage</a>
+            </div>
+        </body>
+        </html>
+        """,
+            409,
+        )
 
 
 # --- CLI Commands ---
@@ -211,6 +520,30 @@ def delete(code):
 
 
 @cli.command()
+def docs():
+    """Open documentation in browser"""
+    # Check if server is running
+    if not LOCK_FILE.exists():
+        cute_echo(error("Server not running! (；′⌒`)"))
+        cute_echo(
+            info(
+                """Please start the server first:
+    shortiepy serve    →  Foreground server
+    shortiepy start    →  Background server"""
+            )
+        )
+        return
+
+    url = f"http://localhost:{config.port}"
+    try:
+        cute_echo(info(f"Opening docs: {url}"))
+        webbrowser.open(url)
+    except Exception as e:
+        cute_echo(error(f"Failed to open browser: {str(e)}"))
+        cute_echo(info(f"Visit manually: {url}"))
+
+
+@cli.command()
 def list():
     """List all shortened URLs"""
     init_db()
@@ -252,6 +585,7 @@ def run(port):
 def show_config():
     """Show shortiepy configurations"""
     config_data = [
+        ("Version", __version__),
         ("Port", str(config.port)),
         ("Host", "localhost"),
         ("Data Directory", str(DATA_DIR)),
