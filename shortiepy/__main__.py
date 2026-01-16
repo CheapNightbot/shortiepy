@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-__version__ = "0.1.0"
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("shortiepy")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 import json
 import os
