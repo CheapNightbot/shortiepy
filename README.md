@@ -45,7 +45,7 @@ Get tab-completion with **one command**:
 shortiepy completion
 ```
 
-> Restart your shell or reload config (source ~/.bashrc / source ~/.zshrc).
+> Restart your shell or reload config (`source ~/.bashrc` for bash OR `source ~/.zshrc` for zsh). 
 > Fish users: no restart needed!
 
 That's it! Works for bash, zsh, and fish.
