@@ -332,7 +332,7 @@ def create_short_url():
 
     if not code or not url:
         return (
-            """
+            f"""
         <!DOCTYPE html>
         <html>
         <head>
