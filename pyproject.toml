@@ -48,3 +48,6 @@ shortiepy = "shortiepy.__main__:cli"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["shortiepy*"]
+
+[tool.setuptools.package-data]
+shortiepy = ["completions/*"]

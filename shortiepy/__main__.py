@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version
 
 try:
     __version__ = version("shortiepy")
@@ -11,6 +11,7 @@ import json
 import os
 import platform
 import secrets
+import shutil
 import sqlite3
 import subprocess
 import tempfile
@@ -495,6 +496,65 @@ def create_short_url():
 def cli():
     """shortiepy: your local URL shortner ( ˶˘ ³˘)♡"""
     pass
+
+
+@cli.command()
+@click.argument("action", required=False, default="install")
+def completion(action):
+    """Manage shell completions"""
+    if action != "install":
+        cute_echo(warn("Only 'install' is supported"))
+        return
+
+    # Detect shell
+    shell = os.environ.get("SHELL", "").split("/")[-1]
+    home = Path.home()
+
+    if shell == "bash":
+        dest_dir = home / ".local" / "share" / "bash-completion" / "completions"
+        dest_file = dest_dir / "shortiepy"
+        src_file = Path(__file__).parent / "completions" / "shortiepy.bash"
+
+    elif shell == "zsh":
+        dest_dir = home / ".zsh" / "completions"
+        dest_file = dest_dir / "_shortiepy"
+        src_file = Path(__file__).parent / "completions" / "shortiepy.zsh"
+
+    elif shell == "fish":
+        dest_dir = home / ".config" / "fish" / "completions"
+        dest_file = dest_dir / "shortiepy.fish"
+        src_file = Path(__file__).parent / "completions" / "shortiepy.fish"
+
+    else:
+        cute_echo(error(f"Unsupported shell: {shell}"))
+        cute_echo(info("Supported: bash, zsh, fish"))
+        return
+
+    # Create directory
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    # Copy file
+    try:
+        shutil.copy(src_file, dest_file)
+        cute_echo(success(f"Installed completion for {shell}!"))
+        if shell == "bash":
+            cute_echo(
+                info(
+                    """Restart your shell or run:
+    source ~/.bashrc"""
+                )
+            )
+        elif shell == "zsh":
+            cute_echo(
+                info(
+                    """Restart your shell or run:
+    source ~/.zshrc"""
+                )
+            )
+        # Fish loads automatically /ᐠ •⩊•マ
+
+    except Exception as e:
+        cute_echo(error(f"Failed to install: {e}"))
 
 
 @cli.command()
