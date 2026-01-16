@@ -116,6 +116,21 @@ def init_db():
     conn.close()
 
 
+def db_execute(query, params=(), fetch=False):
+    """Execute DB query safely with automatic connection handling"""
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cur = conn.cursor()
+            cur.execute(query, params)
+            if fetch:
+                return cur.fetchall()
+            return cur.rowcount
+    except sqlite3.OperationalError as e:
+        if "database is locked" in str(e):
+            raise RuntimeError("Database busy! Try again later. (；′⌒`)")
+        raise
+
+
 # --- Flask App (for server) ---
 app = Flask(__name__)
 
@@ -123,9 +138,7 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     init_db()
-    conn = sqlite3.connect(DB_PATH)
-    count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()[0]
-    conn.close()
+    count = db_execute("SELECT COUNT(*) FROM urls", fetch=True)[0][0]
 
     return f"""
     <!DOCTYPE html>
@@ -294,11 +307,10 @@ def index():
 
 @app.route("/<code>")
 def redirect_url(code):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("SELECT url FROM urls WHERE code = ?", (code,))
-    row = cur.fetchone()
-    conn.close()
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT url FROM urls WHERE code = ?", (code,))
+        row = cur.fetchone()
 
     if not row:
         abort(404)
@@ -364,10 +376,8 @@ def create_short_url():
 
     init_db()
     try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
-        conn.commit()
-        conn.close()
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
         short_url = f"http://localhost:{config.port}/{code}"
         return (
             f"""
@@ -489,10 +499,7 @@ def add(url):
     code = generate_code()
 
     try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
-        conn.commit()
-        conn.close()
+        db_execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
         short_url = f"http://localhost:{config.port}/{code}"
         pyperclip.copy(short_url)
         cute_echo(success(f"Copied to clipboard: {short_url}"))
@@ -500,19 +507,19 @@ def add(url):
         # Very rare, but handle duplicate codes
         cute_echo(warn("Oops! Code collision (unlikely!) ~ (ᵕ—ᴗ—)"))
         return add(url)  # retry
+    except RuntimeError as e:
+        cute_echo(error(str(e)))
 
 
 @cli.command()
 @click.argument("code")
 def delete(code):
     """Delete a short URL by code"""
-    init_db()
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("DELETE FROM urls WHERE code = ?", (code,))
-    deleted = cur.rowcount
-    conn.commit()
-    conn.close()
+    try:
+        deleted = db_execute("DELETE FROM urls WHERE code = ?", (code,))
+    except RuntimeError as e:
+        cute_echo(error(str(e)))
+
     if deleted:
         cute_echo(success(f"Deleted: http://localhost:{config.port}/{code}"))
     else:
@@ -547,11 +554,14 @@ def docs():
 def list():
     """List all shortened URLs"""
     init_db()
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("SELECT code, url, created_at FROM urls ORDER BY created_at DESC")
-    rows = cur.fetchall()
-    conn.close()
+
+    try:
+        rows = db_execute(
+            "SELECT code, url, created_at FROM urls ORDER BY created_at DESC",
+            fetch=True,
+        )
+    except RuntimeError as e:
+        cute_echo(error(str(e)))
 
     if not rows:
         cute_echo(warn("(;´༎ຶД༎ຶ`) No links yet! Add one with `shortiepy add <URL>`"))
