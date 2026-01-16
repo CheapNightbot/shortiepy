@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi-release
-      url: https://pypi.org/project/yutipy
+      url: https://pypi.org/project/shortiepy
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
