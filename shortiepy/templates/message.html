@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card center">
+    <h2>{{ title }}</h2>
+    <p>{{ message|safe }}</p>
+    <a href="{{ link }}" class="btn">← Back to homepage</a>
+</div>
+{% endblock %}

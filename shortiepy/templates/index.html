@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="header">
+    <h1>✨ shortiepy 🌸</h1>
+    <p>Your local URL shortener ( ˶˘ ³˘)♡</p>
+</div>
+
+<div class="stats">
+    <p><strong>Total URLs:</strong> {{ total_urls }}</p>
+    <a href="/list" class="link">View URLs</a>
+</div>
+
+<div class="card">
+    <h2>🌐 Web API</h2>
+    <p>Create short URLs directly from your browser:</p>
+    <code>/new?code=your_code&url=https://example.com</code>
+    <p>Example: </p>
+    <ul>
+        <li><a href="/new?code=meow&url=https://example.com">/new?code=meow&url=https://example.com</a></li>
+        <li><a href="/new?url=https://example.org">/new?code=url=https://example.org</a></li>
+    </ul>
+</div>
+
+<div class="card">
+    <h2>💻 CLI Commands</h2>
+
+    <h3>🔗 URL Management</h3>
+    <ul>
+        <li><code>shortiepy add &lt;URL&gt;</code> → Create short URL</li>
+        <li><code>shortiepy list</code> → Show all links</li>
+        <li><code>shortiepy delete &lt;code&gt;</code> → Remove link</li>
+    </ul>
+
+    <h3>🖥️ Server Control</h3>
+    <ul>
+        <li><code>shortiepy serve</code> → Start server (foreground)
+            <ul class="option">
+                <li>Optional: <code>--port PORT</code></li>
+            </ul>
+        </li>
+        <li><code>shortiepy start</code> → Start server (background)
+            <ul class="option">
+                <li>Optional: <code>--port PORT</code></li>
+            </ul>
+        </li>
+        <li><code>shortiepy stop</code> → Stop background server</li>
+        <li><code>shortiepy status</code> → Check server status</li>
+    </ul>
+
+    <h3>ℹ️ Information</h3>
+    <ul>
+        <li><code>shortiepy config</code> → Show configuration</li>
+        <li><code>shortiepy docs</code> → Open this documentation</li>
+        <li><code>shortiepy --version</code> → Show version</li>
+    </ul>
+</div>
+
+<div class="card">
+    <h2>📝 Examples</h2>
+
+    <h3>✨ Basic Workflow</h3>
+    <pre><code>&gt;&gt;&gt; shortiepy add https://example.com/very/long/url
+🌸 Copied to clipboard: http://localhost:9876/x9f2k</code></pre>
+
+    <pre><code>&gt;&gt;&gt; shortiepy list
+ℹ️  Your shortiepy links:
+╭────────┬─────────────────────────────┬───────────────────────────────────┬─────────────────────╮
+│ Code   │ Short URL                   │ Original URL                      │ Created At          │
+├────────┼─────────────────────────────┼───────────────────────────────────┼─────────────────────┤
+│ x9f2k  │ http://localhost:9876/x9f2k │ https://example.com/very/long/url │ YYYY-MM-DD hh:mm:ss │
+╰────────┴─────────────────────────────┴───────────────────────────────────┴─────────────────────╯
+</code></pre>
+
+    <pre><code>&gt;&gt;&gt; shortiepy delete x9f2k
+🌸 Deleted: http://localhost:9876/x9f2k</code></pre>
+
+    <h3>⚙️ Custom Port</h3>
+    <pre><code>&gt;&gt;&gt; shortiepy start --port 8080
+🌸 Started server (PID: 12345)
+ℹ️  Logs: /tmp/shortiepy.log</code></pre>
+
+    <pre><code>&gt;&gt;&gt; shortiepy add https://example.com
+🌸 Copied to clipboard: http://localhost:8080/y3k9m</code></pre>
+</div>
+
+<div class="card">
+    <h2>🎀 Features</h2>
+    <ul>
+        <li>🔒 100% offline - no data leaves your machine</li>
+        <li>🌸 Cross-platform (Linux/macOS/Windows)</li>
+        <li>📋 Auto-copies short URLs to clipboard</li>
+        <li>🎨 Pastel colors & kaomojis everywhere!</li>
+    </ul>
+</div>
+{% endblock %}

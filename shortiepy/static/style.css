@@ -1,0 +1,140 @@
+*::selection {
+    background: #ffdfef;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    margin-top: 40px;
+    padding: 20px;
+    background: #fff9fb;
+    color: #5a3a5e;
+    line-height: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 5rem);
+}
+
+h1 {
+    color: #ff69b4;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h2,
+h3 {
+    color: #d47ab8;
+    margin-top: 24px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+main {
+    flex: 1;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card.center {
+    text-align: center;
+}
+
+.stats {
+    background: #f8e9f1;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 20px 0;
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* Inline code */
+code {
+    background: #f0e6f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.option {
+    color: #a07cb2;
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+/* Preformatted blocks */
+pre {
+    background: #f8e9f1;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 12px 0;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+    font-size: 0.95em;
+}
+
+.link,
+a {
+    color: #ff69b4;
+    text-decoration: none;
+}
+
+a:hover,
+.link:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    color: #ff69b4;
+    background: #ffdfef;
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+th,
+td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0e6f5;
+}
+
+th {
+    background: #f8e9f1;
+    color: #d47ab8;
+    font-weight: 600;
+}
+
+tr:hover {
+    background: #fdf6fa;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #a07cb2;
+    width: 100%;
+}
