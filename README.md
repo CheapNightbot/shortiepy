@@ -9,19 +9,19 @@ Your local URL shortener (˶˘ ³˘)♡
 
 ## Installation
 
+- **Using `pipx`** [Recommended]
+
+Follow instructions to install `pipx` here: [pipx.pypa.io/stable/installation](https://pipx.pypa.io/stable/installation/) and after installing `pipx` in your system, install `shortiepy`:
+
+```bash
+pipx install shortiepy
+```
+
 - **Using `pip`**
 
 ```bash
 pip install shortiepy
 ```
-
-- **Download Standalone Binaries**
-
-Download from [GitHub Releases](https://github.com/CheapNightbot/shortiepy/releases/latest):
-
-- Linux: `shortiepy-linux`
-- macOS: `shortiepy-macos`
-- Windows: `shortiepy-windows.exe`
 
 ## Usage
 
