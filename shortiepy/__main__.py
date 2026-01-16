@@ -16,6 +16,7 @@ import click
 import pyperclip
 from colorama import init as colorama_init
 from flask import Flask, abort, redirect, request
+from markupsafe import escape
 from tabulate import tabulate
 from waitress import serve
 
@@ -422,7 +423,7 @@ def create_short_url():
             <div class="card">
                 <h2>✨ Success!</h2>
                 <p>Created short URL:</p>
-                <p><a href="{short_url}" style="color: #ff69b4; font-size: 1.2em;">{short_url}</a></p>
+                <p><a href="{escape(short_url)}" style="color: #ff69b4; font-size: 1.2em;">{escape(short_url)}</a></p>
                 <a href="/" class="btn">← Back to homepage</a>
             </div>
         </body>
@@ -473,7 +474,7 @@ def create_short_url():
         <body>
             <div class="card">
                 <h2>⚠️ Code Exists</h2>
-                <p>Code '{code}' is already taken!</p>
+                <p>Code '{escape(code)}' is already taken!</p>
                 <a href="/" class="btn">← Back to homepage</a>
             </div>
         </body>
