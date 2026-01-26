@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "setuptools_scm", "wheel"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -37,10 +37,6 @@ dependencies = [
 Homepage = "https://github.com/CheapNightbot/shortiepy"
 Repository = "https://github.com/CheapNightbot/shortiepy.git"
 Issues = "https://github.com/CheapNightbot/shortiepy/issues"
-
-[tool.setuptools_scm]
-version_scheme = "guess-next-dev"
-local_scheme = "no-local-version"
 
 [project.scripts]
 shortiepy = "shortiepy.__main__:cli"
