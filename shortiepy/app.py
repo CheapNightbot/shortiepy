@@ -18,7 +18,7 @@ def create_app(db_path, config_port):
 
     @app.context_processor
     def inject_version():
-        return dict(version=__version__)
+        return {"version": __version__}
 
     def get_db_connection():
         return sqlite3.connect(app.config["DB_PATH"])
