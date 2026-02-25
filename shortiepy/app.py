@@ -80,7 +80,7 @@ def create_app(config_port):
     def list_urls():
         try:
             rows = db_execute(
-                "SELECT code, url, created_at FROM urls ORDER BY created_at DESC",
+                "SELECT code, url, datetime(created_at, 'localtime') FROM urls ORDER BY created_at DESC",
                 fetch=True,
             )
         except RuntimeError:
