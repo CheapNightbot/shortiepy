@@ -132,6 +132,10 @@ tr:hover {
     background: #fdf6fa;
 }
 
+.datetime {
+    font-size: 0.9em;
+}
+
 footer {
     text-align: center;
     margin-top: 40px;
