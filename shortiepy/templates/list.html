@@ -17,18 +17,34 @@
             </tr>
         </thead>
         <tbody>
-        {% for url in urls %}
+            {% for url in urls %}
             <tr>
                 <td>{{ url.code }}</td>
                 <td><a href="{{ url.short_url }}" target="_blank" rel="nofollow noopener">{{ url.short_url }}</a></td>
                 <td>{{ url.display_url }}</td>
-                <td>{{ url.created }}</td>
+                <td class="datetime">{{ url.created }}</td>
             </tr>
-        {% endfor %}
+            {% endfor %}
         </tbody>
     </table>
     {% else %}
     <p style="text-align: center; color: #a07cb2;">(;´༎ຶД༎ຶ`) No links yet!</p>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Format the created date to a more readable format
+    document.querySelectorAll('.datetime').forEach(function (element) {
+        const date = new Date(element.textContent);
+        element.textContent = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(date);
+    });
+</script>
 {% endblock %}
