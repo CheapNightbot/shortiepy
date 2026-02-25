@@ -35,6 +35,8 @@ def create_app(config_port):
             )
         except RuntimeError:
             abort(404)
+        if not row:
+            abort(404)
         return redirect(row[0])
 
     @app.route("/new")
