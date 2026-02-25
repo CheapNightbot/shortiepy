@@ -133,7 +133,22 @@ tr:hover {
 }
 
 .datetime {
-    font-size: 0.9em;
+    font-size: 0.8em;
+}
+
+.delBtn {
+    background: transparent;
+    border: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.delBtn:hover {
+    cursor: pointer;
+    transform: rotate3d(0, 0, 1, 90deg);
+}
+
+.delBtn:active {
+    transform: scale(0.8);
 }
 
 footer {
@@ -141,4 +156,11 @@ footer {
     margin-top: 40px;
     color: #a07cb2;
     width: 100%;
+}
+
+
+@media screen and (max-width: 1000px) {
+    td {
+        font-size: 0.8em;
+    }
 }
