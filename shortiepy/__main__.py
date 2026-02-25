@@ -22,8 +22,6 @@ from pathlib import Path
 import click
 import pyperclip
 from colorama import init as colorama_init
-from flask import Flask, abort, redirect, request
-from markupsafe import escape
 from tabulate import tabulate
 from waitress import serve
 
@@ -124,7 +122,7 @@ def init_db():
     conn.close()
 
 
-def db_execute(query, params=(), fetch=False):
+def db_execute(query, params=(), fetch=False, fetchone=False):
     """Execute DB query safely with automatic connection handling"""
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -132,18 +130,21 @@ def db_execute(query, params=(), fetch=False):
             cur.execute(query, params)
             if fetch:
                 return cur.fetchall()
+            if fetchone:
+                return cur.fetchone()
             return cur.rowcount
     except sqlite3.OperationalError as e:
         if "database is locked" in str(e):
             raise RuntimeError("Database busy! Try again later. (；′⌒`)")
-        raise
+    except sqlite3.IntegrityError as e:
+        raise RuntimeError(f"Database error: {str(e)}")
 
 
 # --- Flask App (for server) ---
 def create_flask_app():
     from .app import create_app
 
-    return create_app(DB_PATH, config.port)
+    return create_app(config.port)
 
 
 # --- CLI Commands ---

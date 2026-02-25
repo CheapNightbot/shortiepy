@@ -10,6 +10,7 @@
     <table>
         <thead>
             <tr>
+                <th>Delete</th>
                 <th>Code</th>
                 <th>Short URL</th>
                 <th>Original URL</th>
@@ -19,6 +20,7 @@
         <tbody>
             {% for url in urls %}
             <tr>
+                <td><button class="delBtn" onclick="deleteUrl('{{ url.code }}')">❌</button></td>
                 <td>{{ url.code }}</td>
                 <td><a href="{{ url.short_url }}" target="_blank" rel="nofollow noopener">{{ url.short_url }}</a></td>
                 <td>{{ url.display_url }}</td>
@@ -35,16 +37,37 @@
 
 {% block scripts %}
 <script>
-    // Format the created date to a more readable format
-    document.querySelectorAll('.datetime').forEach(function (element) {
-        const date = new Date(element.textContent);
-        element.textContent = new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).format(date);
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // Add click event listeners to all delete buttons
+        document.querySelectorAll('.delBtn').forEach((button) => {
+            button.addEventListener('click', function () {
+                const code = this.getAttribute('onclick').match(/deleteUrl\('(.+)'\)/)[1];
+                if (confirm('Are you sure you want to delete this link?')) {
+                    fetch(`/delete/${code}`, { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert('Failed to delete the link.');
+                            }
+                        });
+                }
+            });
+        });
+
+        // Format the created date to a more readable format
+        document.querySelectorAll('.datetime').forEach((element) => {
+            const date = new Date(element.textContent);
+            element.textContent = new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        });
     });
 </script>
 {% endblock %}
