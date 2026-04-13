@@ -7,6 +7,8 @@ Your local URL shortener (˶˘ ³˘)♡
 - 📋 Auto-copies short URLs to clipboard
 - 🎀 Pastel colors & kaomojis everywhere!
 
+<img width="1080" height="720" alt="image" src="https://github.com/user-attachments/assets/44bdedba-410b-49fb-afb1-a13eaa1f3a7a" />
+
 ## Installation
 
 - **Using `pipx`** [Recommended]
