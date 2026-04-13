@@ -58,6 +58,7 @@ You can create a systemd (user) service for automatically running the server whe
     systemctl --user daemon-reload
     ```
   - Then running `systemctl --user status shortiepy.service` should show output saying "No service 'shortiepy.service' found" (or something like that).
+  - Additionally, delete the `shortiepy.service` file from `~/.config/systemd/user/` directory.
 
 ## Usage
 
