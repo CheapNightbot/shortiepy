@@ -23,6 +23,42 @@ pipx install shortiepy
 pip install shortiepy
 ```
 
+### Run the server automatically on startup - Linux only [Optional]
+
+You can create a systemd (user) service for automatically running the server when you turn on your PC. 
+
+- Check the `shortiepy.service` file at the root of this repository. 
+  - Download it and move it to `~/.config/systemd/user/` directory.
+- Run the following commands to enable and run the service:
+  - ```bash
+    systemctl --user daemon-reload
+    ```
+  - ```bash
+    systemctl --user enable --now shortiepy.service
+    ```
+- To check the status of the service, you can run following command:
+  - ```bash
+    systemctl --user status shortiepy.service
+    ```
+  - If you see following output at the end, then everything went well:
+  ```bash
+  ... systemd[1282]: Started shortiepy.service - shortiepy URL Shortener.
+  ... shortiepy[85824]: ℹ  Running shortiepy server on http://localhost:9876
+  ... shortiepy[85824]: ⚠  Press CTRL + C to stop the server. (๑•̀ㅂ•́)و✧
+  ```
+
+- If for some reason you want to undo above steps (disable auto-start and systemd service), you can run following commands to do so:
+  - ```bash
+    systemctl --user stop shortiepy.service
+    ```
+  - ```bash
+    systemctl --user disable shortiepy.service
+    ```
+  - ```bash
+    systemctl --user daemon-reload
+    ```
+  - Then running `systemctl --user status shortiepy.service` should show output saying "No service 'shortiepy.service' found" (or something like that).
+
 ## Usage
 
 - **Add a URL**
