@@ -238,6 +238,8 @@ def add(url):
 @click.argument("code")
 def delete(code):
     """Delete a short URL by code"""
+    deleted = None
+
     try:
         deleted = db_execute("DELETE FROM urls WHERE code = ?", (code,))
     except RuntimeError as e:
@@ -277,6 +279,7 @@ def docs():
 def list():
     """List all shortened URLs"""
     init_db()
+    rows = None
 
     try:
         rows = db_execute(
@@ -306,13 +309,22 @@ def list():
 
 @cli.command(name="serve")
 @click.option("--port", default=DEFAULT_PORT, help="Port to run shortiepy on")
-def run(port):
+@click.option(
+    "--dev",
+    default=False,
+    is_flag=True,
+    help="Run with live reload during development. Do NOT use in the production!",
+)
+def run(port, dev):
     """Start the local redirect server"""
     config.save(port)
     cute_echo(info(f"Running shortiepy server on http://localhost:{config.port}"))
     cute_echo(warn("Press CTRL + C to stop the server. (๑•̀ㅂ•́)و✧"))
     app = create_flask_app()
-    serve(app=app, host="localhost", port=config.port)
+    if dev:
+        app.run(host="localhost", port=config.port, debug=True)
+    else:
+        serve(app=app, host="localhost", port=config.port)
 
 
 @cli.command(name="config")

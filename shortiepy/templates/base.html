@@ -1,22 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>{% block title %}shortiepy 🌸{% endblock %}</title>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}"
+        />
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>"
+        />
+    </head>
 
-<head>
-    <meta charset="utf-8">
-    <title>{% block title %}shortiepy 🌸{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+    <body>
+        <main>{% block content %}{% endblock %}</main>
 
-<body>
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+        <footer>
+            <p>Made with 🩷 by ポテト ^. .^₎ฅ | v{{ version }}</p>
+        </footer>
 
-    <footer>
-        <p>Made with 🩷 by ポテト ^. .^₎ฅ | v{{ version }}</p>
-    </footer>
-
-    {% block scripts %}{% endblock %}
-</body>
-
+        {% block scripts %}{% endblock %}
+    </body>
 </html>

@@ -23,7 +23,7 @@
                 <td><button class="delBtn" onclick="deleteUrl('{{ url.code }}')">❌</button></td>
                 <td>{{ url.code }}</td>
                 <td><a href="{{ url.short_url }}" target="_blank" rel="nofollow noopener">{{ url.short_url }}</a></td>
-                <td>{{ url.display_url }}</td>
+                <td title="{{ url.display_url_full }}">{{ url.display_url }}</td>
                 <td class="datetime">{{ url.created }}</td>
             </tr>
             {% endfor %}

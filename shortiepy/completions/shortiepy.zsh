@@ -38,4 +38,3 @@ else
     # eval/source/. command, register function for later
     compdef _shortiepy_completion shortiepy
 fi
-
