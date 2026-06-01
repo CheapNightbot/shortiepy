@@ -43,12 +43,12 @@ def create_app(config_port):
     def create_short_url():
         code = request.args.get("code") or generate_code()
         url = request.args.get("url")
-        templete_file = "message.html"
+        template_file = "message.html"
 
         if not url:
             return (
                 render_template(
-                    templete_file,
+                    template_file,
                     title="❌ Missing Parameters",
                     message="Use: <code>/new?code=your_code&url=https://example.com</code>",
                     link="/",
@@ -60,7 +60,7 @@ def create_app(config_port):
             db_execute("INSERT INTO urls (code, url) VALUES (?, ?)", (code, url))
             short_url = f"http://localhost:{app.config['PORT']}/{code}"
             return render_template(
-                templete_file,
+                template_file,
                 title="✨ Success!",
                 message=f"Created short URL: <a href='{short_url}' target='_blank' rel='nofollow noopener'>{short_url}</a>",
                 link="/",
@@ -68,7 +68,7 @@ def create_app(config_port):
         except RuntimeError:
             return (
                 render_template(
-                    templete_file,
+                    template_file,
                     title="⚠️ Code Exists",
                     message=f"Code '{code}' is already taken!",
                     link="/",
@@ -89,12 +89,15 @@ def create_app(config_port):
         urls = []
         for code, url, created in rows:
             short_url = f"http://localhost:{app.config['PORT']}/{code}"
-            display_url = (url[:50] + "...") if len(url) > 50 else url
+            display_url = url
             urls.append(
                 {
                     "code": code,
                     "short_url": short_url,
-                    "display_url": display_url,
+                    "display_url": (display_url[:30] + "...")
+                    if len(display_url) > 30
+                    else display_url,
+                    "display_url_full": display_url,
                     "created": created,
                 }
             )

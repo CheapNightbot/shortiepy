@@ -26,4 +26,3 @@ _shortiepy_completion_setup() {
 }
 
 _shortiepy_completion_setup;
-
