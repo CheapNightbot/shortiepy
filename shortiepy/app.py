@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from flask import Flask, abort, redirect, render_template, request
@@ -41,6 +42,9 @@ def create_app(config_port):
     @app.route("/new", methods=["GET"])
     def create_short_url():
         code = request.args.get("code") or generate_code()
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,32}", code):
+            return "Invalid short code. Use 1–32 letters, numbers, '_' or '-'.", 400
+
         url = request.args.get("url")
         template_file = "message.html"
 
