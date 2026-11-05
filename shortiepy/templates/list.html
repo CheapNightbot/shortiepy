@@ -20,7 +20,7 @@
         <tbody>
             {% for url in urls %}
             <tr>
-                <td><button class="delBtn" onclick="deleteUrl('{{ url.code }}')">❌</button></td>
+                <td><button type="button" class="delBtn" data-code="{{ url.code }}">❌</button></td>
                 <td>{{ url.code }}</td>
                 <td><a href="{{ url.short_url }}" target="_blank" rel="nofollow noopener">{{ url.short_url }}</a></td>
                 <td title="{{ url.display_url_full }}">{{ url.display_url }}</td>
@@ -38,21 +38,28 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-
-        // Add click event listeners to all delete buttons
         document.querySelectorAll('.delBtn').forEach((button) => {
-            button.addEventListener('click', function () {
-                const code = this.getAttribute('onclick').match(/deleteUrl\('(.+)'\)/)[1];
-                if (confirm('Are you sure you want to delete this link?')) {
-                    fetch(`/delete/${code}`, { method: 'POST' })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                location.reload();
-                            } else {
-                                alert('Failed to delete the link.');
-                            }
-                        });
+            button.addEventListener('click', async () => {
+                const code = button.dataset.code;
+
+                if (!confirm('Are you sure you want to delete this link?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(
+                        `/delete/${encodeURIComponent(code)}`,
+                        { method: 'POST' }
+                    );
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to delete the link.');
+                    }
+                } catch {
+                    alert('Failed to delete the link.');
                 }
             });
         });
