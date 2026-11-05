@@ -1,4 +1,3 @@
-import sqlite3
 from pathlib import Path
 
 from flask import Flask, abort, redirect, render_template, request
@@ -19,7 +18,7 @@ def create_app(config_port):
     def inject_version():
         return {"version": __version__}
 
-    @app.route("/")
+    @app.route("/", methods=["GET"])
     def index():
         try:
             count = db_execute("SELECT COUNT(*) FROM urls", fetchone=True)[0]
@@ -27,7 +26,7 @@ def create_app(config_port):
             count = -1
         return render_template("index.html", total_urls=count, port=app.config["PORT"])
 
-    @app.route("/<code>")
+    @app.route("/<code>", methods=["GET"])
     def redirect_url(code):
         try:
             row = db_execute(
@@ -39,7 +38,7 @@ def create_app(config_port):
             abort(404)
         return redirect(row[0])
 
-    @app.route("/new")
+    @app.route("/new", methods=["GET"])
     def create_short_url():
         code = request.args.get("code") or generate_code()
         url = request.args.get("url")
@@ -50,8 +49,6 @@ def create_app(config_port):
                 render_template(
                     template_file,
                     title="❌ Missing Parameters",
-                    message="Use: <code>/new?code=your_code&url=https://example.com</code>",
-                    link="/",
                 ),
                 400,
             )
@@ -62,21 +59,19 @@ def create_app(config_port):
             return render_template(
                 template_file,
                 title="✨ Success!",
-                message=f"Created short URL: <a href='{short_url}' target='_blank' rel='nofollow noopener'>{short_url}</a>",
-                link="/",
+                short_url=short_url,
             )
         except RuntimeError:
             return (
                 render_template(
                     template_file,
                     title="⚠️ Code Exists",
-                    message=f"Code '{code}' is already taken!",
-                    link="/",
+                    code=code,
                 ),
                 409,
             )
 
-    @app.route("/list")
+    @app.route("/list", methods=["GET"])
     def list_urls():
         try:
             rows = db_execute(

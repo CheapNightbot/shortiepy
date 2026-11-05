@@ -2,7 +2,15 @@
 {% block content %}
 <div class="card center">
     <h2>{{ title }}</h2>
-    <p>{{ message|safe }}</p>
-    <a href="{{ link }}" class="btn">← Back to homepage</a>
+    <p>
+        {% if short_url %}
+        Created short URL: <a href='{{ short_url }}' target='_blank' rel='nofollow noopener'>{{ short_url }}</a>
+        {% elif code %}
+        Code '{{ code }}' is already taken!
+        {% else %}
+        Use: <code>/new?code=your_code&url=https://example.com</code>
+        {% endif %}
+    </p>
+    <a href="{{ url_for('index') }}" class="btn">← Back to homepage</a>
 </div>
 {% endblock %}
