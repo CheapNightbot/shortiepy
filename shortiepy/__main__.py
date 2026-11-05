@@ -15,7 +15,6 @@ import shutil
 import sqlite3
 import subprocess
 import sys
-import tempfile
 import webbrowser
 from pathlib import Path
 
@@ -93,9 +92,13 @@ def get_data_dir():
 # Paths
 DATA_DIR = get_data_dir()
 DATA_DIR.mkdir(parents=True, exist_ok=True)  # Create if missing
+
+if os.name != "nt":
+    os.chmod(DATA_DIR, 0o700)
+
 DB_PATH = DATA_DIR / "shortiepy.db"
-LOCK_FILE = Path(tempfile.gettempdir()) / "shortiepy.lock"
-LOG_FILE = Path(tempfile.gettempdir()) / "shortiepy.log"
+LOCK_FILE = DATA_DIR / "shortiepy.lock"
+LOG_FILE = DATA_DIR / "shortiepy.log"
 
 # Config
 CONFIG_PATH = DATA_DIR / "config.json"
@@ -120,6 +123,9 @@ def init_db():
     """
     )
     conn.close()
+
+
+init_db()
 
 
 def db_execute(query, params=(), fetch=False, fetchone=False):
@@ -218,7 +224,6 @@ def completion(action):
 @click.argument("url")
 def add(url):
     """Add a new URL and copy short link to clipboard"""
-    init_db()
     code = generate_code()
 
     try:
@@ -278,7 +283,6 @@ def docs():
 @cli.command()
 def list():
     """List all shortened URLs"""
-    init_db()
     rows = None
 
     try:
@@ -375,14 +379,18 @@ from waitress import serve
 app = create_flask_app()
 serve(app=app, host="localhost", port={port})
 """
+    log_flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    log_flags |= getattr(os, "O_NOFOLLOW", 0)
 
-    # Start in background
-    proc = subprocess.Popen(
-        [sys.executable, "-c", server_script],
-        stdout=open(LOG_FILE, "w"),
-        stderr=subprocess.STDOUT,
-        start_new_session=True,
-    )
+    log_fd = os.open(LOG_FILE, log_flags, 0o600)
+    with os.fdopen(log_fd, "w") as log_file:
+        # Start in background
+        proc = subprocess.Popen(
+            [sys.executable, "-c", server_script],
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
 
     with open(LOCK_FILE, "w") as f:
         f.write(str(proc.pid))
@@ -427,7 +435,6 @@ def status():
         cute_echo(warn("Server: Stopped (•˕ •マ.ᐟ"))
 
     # Show DB stats
-    init_db()
     conn = sqlite3.connect(DB_PATH)
     count = conn.execute("SELECT COUNT(*) FROM urls").fetchone()[0]
     conn.close()
